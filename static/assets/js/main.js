@@ -271,6 +271,9 @@ $.pushMenu.activate("[data-toggle='offcanvas']");
         ev.preventDefault();
     });
 })();
+
+
+
 /* Search header end */
 
 // toggle full screen
