@@ -1,6 +1,11 @@
-from flask import Flask, render_template
+from flask import *
+import requests
+import math
+from tkinter import *
+from datetime import datetime
 
 app = Flask(__name__)
+
 
 # để chạy được code nhớ pip install flask !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -11,16 +16,79 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
+
+# 404 not found page
+@app.errorhandler(404)
+def not_found(e):
+    return render_template('404.html'), 404
+
+
+api_key = "f978c96591a433fbbada0ef7e7d323b1"
+
+
+def time_from_utc_with_timezone(utc_with_tz):
+    local_time = datetime.utcfromtimestamp(utc_with_tz)
+    return local_time.time()
+
+
+data = []
+label = ['City', 'Temp', 'Feel temp', 'Pressure', 'Humidity', 'Wind speed', 'Sunrise time', 'Sunset time', 'Cloud',
+         'Description']
+
+
+def get_weather(lat, lon):
+    # url = f"http://history.openweathermap.org/data/2.5/history/city?lat=41.85&lon=-87&type=hour&start=1643720400&end=1643806800&appid={api_key}"
+    url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}"
+    response = requests.get(url).json()
+    kelvin = 273.15
+    temp = int(response['main']['temp'] - kelvin)
+    feel_temp = int(response['main']['feels_like'] - kelvin)
+    pressure = response['main']['pressure']
+    humidity = response['main']['humidity']
+    wind_speed = response['wind']['speed'] * 3.6
+    sunrise = response['sys']['sunrise']
+    sunset = response['sys']['sunset']
+    timezone = response['timezone']
+    cloud = response['clouds']['all']
+    description = response['weather'][0]['description']
+    sunrise_time = time_from_utc_with_timezone(sunrise + timezone)
+    sunset_time = time_from_utc_with_timezone(sunset + timezone)
+    city = response['name']
+    print(f"Weather infomation of {city}")
+    print(f"Temp (Celsius): {temp}")
+    print(f"Feel likes in (Celcius): {feel_temp}")
+    print(f"Pressure: {pressure} hPa")
+    print(f"Humidity: {humidity}%")
+    print("Wind speed: {0:.2f} km/hr".format(wind_speed))
+    print(f"Sunrise at {sunrise_time} ans Sunset at {sunset_time}")
+    print(f"Cloud: {cloud}%")
+    print(f"Info: {description}")
+    data.clear()
+    data.extend([city, str(temp) + "°C", str(feel_temp) + "°C", str(pressure) + "hPa", str(humidity) + "%",
+                 str(round(wind_speed)) + "km/hr", sunrise_time, sunset_time, str(cloud) + "%", description])
+
+
+@app.route('/test')
+def performweather_1():
+    return render_template('test.html')
+
+
+@app.route('/weather_perform', methods=['POST', 'GET'])
+def performweather():
+    lat = request.form['lat']
+    long = request.form['long']
+    location = "Weather information of"
+    get_weather(lat, long)
+    location += " " + data[0]
+    return render_template('weather.html', location=location, data=data, label=label)
+
+
 # weather draf mode
 @app.route('/weather')
 @app.route('/weather.html')
 def weather():
     return render_template('weather.html')
 
-# 404 not found page
-@app.errorhandler(404)
-def not_found(e):
-    return render_template('404.html'), 404
 
 if __name__ == "__main__":
     app.run(debug=True)
