@@ -3,6 +3,7 @@ import requests
 import math
 from tkinter import *
 from datetime import datetime
+import city
 
 app = Flask(__name__)
 
@@ -32,13 +33,14 @@ def time_from_utc_with_timezone(utc_with_tz):
 
 
 data = []
-label = ['City', 'Temp', 'Feel temp', 'Pressure', 'Humidity', 'Wind speed', 'Sunrise time', 'Sunset time', 'Cloud',
+label = ['Temp', 'Feel temp', 'Pressure', 'Humidity', 'Wind speed', 'Sunrise time', 'Sunset time', 'Cloud',
          'Description']
 
 
 def get_weather(lat, lon):
     # url = f"http://history.openweathermap.org/data/2.5/history/city?lat=41.85&lon=-87&type=hour&start=1643720400&end=1643806800&appid={api_key}"
     url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}"
+    print(url)
     response = requests.get(url).json()
     kelvin = 273.15
     temp = int(response['main']['temp'] - kelvin)
@@ -64,7 +66,7 @@ def get_weather(lat, lon):
     print(f"Cloud: {cloud}%")
     print(f"Info: {description}")
     data.clear()
-    data.extend([city, str(temp) + "°C", str(feel_temp) + "°C", str(pressure) + "hPa", str(humidity) + "%",
+    data.extend([str(temp) + "°C", str(feel_temp) + "°C", str(pressure) + "hPa", str(humidity) + "%",
                  str(round(wind_speed)) + "km/hr", sunrise_time, sunset_time, str(cloud) + "%", description])
 
 
@@ -75,19 +77,29 @@ def performweather_1():
 
 @app.route('/weather_perform', methods=['POST', 'GET'])
 def performweather():
-    lat = request.form['lat']
-    long = request.form['long']
-    location = "Weather information of"
+    c = []
+    for x in city.city:
+        c.append(x)
+    loc = request.form.get('comp_select')
+    location = "Weather information of " + loc
+    a = []
+    for value in city.city[loc]:
+        a.append(value)
+    lat = a[0]
+    long = a[1]
+    a.clear()
     get_weather(lat, long)
-    location += " " + data[0]
-    return render_template('weather.html', location=location, data=data, label=label)
+    return render_template('weather.html', lat=lat, long=long, city=c, location=location, label=label, data=data, loc=loc)
 
 
 # weather draf mode
 @app.route('/weather')
 @app.route('/weather.html')
 def weather():
-    return render_template('weather.html')
+    c = []
+    for x in city.city:
+        c.append(x)
+    return render_template('weather.html', city=c)
 
 
 if __name__ == "__main__":

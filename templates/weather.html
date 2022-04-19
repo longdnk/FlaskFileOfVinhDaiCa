@@ -508,7 +508,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="main-header">
-                    <h4>Weather</h4>
+                    <h4>Weather forecast</h4>
                 </div>
             </div>
             <div class="row" style="margin-left: 10px; margin: auto;">
@@ -517,14 +517,25 @@
                         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
                         <script type="text/javascript"
                                 src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBY5p5e5PtJuJLl_nRpjefL0S094jdhEP8&libraries=places"></script>
+                        <!--                        <div class="col-lg-2" style="margin-top: 5px;">-->
+                        <!--                            <input class="form-control" type="text" id="location" name="location">-->
+                        <!--                        </div>-->
                         <div class="col-lg-2" style="margin-top: 5px;">
-                            <input class="form-control" type="text" id="location" name="location">
+                            <select name="comp_select" class="form-select form-control"
+                                    aria-label="Default select example">
+                                {% for x in city %}
+                                <option name="{{ x }}" value="{{ x }}">{{ x }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                         <div class="col-lg-2" style="margin-top: 5px;">
-                            <input class="form-control" type="text" placeholder="Latitude" id="lat" name="lat">
+                            <input value="{{ lat }}" class="form-control" type="text" placeholder="Latitude" id="lat"
+                                   name="lat" disabled>
                         </div>
                         <div class="col-lg-2" style="margin-top: 5px;">
-                            <input class="form-control" type="text" placeholder="Longitude" id="long" name="long">
+                            <input value="{{ long }}" class="form-control" type="text" placeholder="Longitude" id="long"
+                                   name="long" disabled
+                            >
                         </div>
                         <div class="col-lg-2" style="margin-top: 5px;">
                             <button type="submit" class="btn btn-primary">Check</button>
@@ -544,7 +555,6 @@
             jQuery("#long").val(place.geometry.location.lng());
         })
     });
-
                         </script>
                     </div>
                 </form>
@@ -678,12 +688,20 @@ $window.scroll(function(){
 
 
 
+
+
+
+
 </script>
 
 <script type="text/javascript">
     setTimeout(function(){
       window.location.reload(true)
     }, 300000)
+
+
+
+
 </script>
 </body>
 </html>
